@@ -1,7 +1,10 @@
 package models
 
 import (
+	"bufio"
+	"fmt"
 	"log"
+	"net/textproto"
 	"strconv"
 	"strings"
 	"time"
@@ -201,17 +204,15 @@ func (res *Message) GetHeaders() string {
 	return res.Headers
 }
 
-func ParseHeaders(headers string) map[string]string {
-	res := make(map[string]string, 10)
-	for _, line := range strings.Split(strings.TrimSuffix(headers, "\n"), "\n") {
-		a := strings.Split(line, ":")
-		if len(a) < 2 {
-
-		}
-		_ = a
-		res[a[0]] = a[1]
+//ParseHeaders returns a map of key value of headers
+func (res *Message) ParseHeaders() map[string][]string {
+	a := strings.NewReader(res.GetHeaders())
+	tp := textproto.NewReader(bufio.NewReader(a))
+	hdr, err := tp.ReadMIMEHeader()
+	if err != nil {
+		fmt.Println(err)
 	}
-	return res
+	return hdr
 }
 
 func getTimeFromString(s string) (t time.Time) {
